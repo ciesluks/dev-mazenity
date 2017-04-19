@@ -2,13 +2,13 @@
 
 var game;
 var maze = [];
-var mazeWidth = 61;
-var mazeHeight = 61;
-var tileSize = 10;
+var mazeWidth = 31;
+var mazeHeight = 31;
+var tileSize = 20;
 var mazeGraphics;
 
 window.onload = function() {
-	game = new Phaser.Game(610, 610, Phaser.CANVAS, "");
+	game = new Phaser.Game(620, 620, Phaser.CANVAS, "");
      game.state.add("PlayGame",playGame);
      game.state.start("PlayGame");
 }

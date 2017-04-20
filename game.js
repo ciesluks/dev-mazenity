@@ -15,7 +15,7 @@ window.onload = function() {
 var playGame = function(game){};
 
 function create(){
-		game.stage.backgroundColor = "#252525";
+		game.stage.backgroundColor = "#00897B";
 
     mazeGraphics = game.add.graphics(0, 0);
     var moves = [];
@@ -25,8 +25,8 @@ function create(){
               maze[i][j] = 1;
          }
     }
-    var posX = 15;
-    var posY = 15;
+    var posX = 1;
+    var posY = 1;
     maze[posX][posY] = 0;
     moves.push(posY + posY * mazeWidth);
     while(moves.length){
@@ -80,7 +80,7 @@ function create(){
 		var easystar = new EasyStar.js();
     easystar.setGrid(maze);
     easystar.setAcceptableTiles([0]);
-    easystar.findPath(15, 15, 29, 29, drawPath);
+    easystar.findPath(1, 1, 29, 29, drawPath);
     easystar.calculate();
 }
 
@@ -88,7 +88,7 @@ function drawPath(path){
      var i = 0;
      game.time.events.loop(Phaser.Timer.SECOND/25, function(){
           if(i < path.length){
-               mazeGraphics.beginFill(0xf44141);
+               mazeGraphics.beginFill(0xFFFFFF);
                mazeGraphics.drawRect(path[i].x * tileSize + 8, path[i].y * tileSize + 8, tileSize - 16, tileSize - 16);
                i++;
                mazeGraphics.endFill();
@@ -97,14 +97,14 @@ function drawPath(path){
 }
 
 function drawGoal(posX, posY){
-     mazeGraphics.beginFill(0x41eef4);
+     mazeGraphics.beginFill(0x004D40);
      mazeGraphics.drawRect(posX * tileSize + 5, posY * tileSize + 5, tileSize - 10, tileSize - 10);
      mazeGraphics.endFill();
 }
 
 function drawMaze(posX, posY){
      mazeGraphics.clear();
-     mazeGraphics.beginFill(0xf0f0f0);
+     mazeGraphics.beginFill(0xFAFAFA);
      for(i = 0; i < mazeHeight; i ++){
           for(j = 0; j < mazeWidth; j ++){
                if(maze[i][j] == 1){

@@ -1,7 +1,7 @@
 // Source code: http://www.emanueleferonato.com/2015/07/03/pure-javascript-a-maze-solving-with-a-bit-of-magic-thanks-to-phaser/
 window.addEventListener("keydown", function(e) {
     // space and arrow keys
-    if([37, 38, 39, 40].indexOf(e.keyCode) > -1) {
+    if([32, 37, 38, 39, 40].indexOf(e.keyCode) > -1) {
         e.preventDefault();
     }
 }, false);
@@ -13,23 +13,26 @@ var mazeGraphics;
 var playerPosX;
 var playerPosY;
 
+var leftKeyIsDown = false;
+var rightKeyIsDown = false;
+var upKeyIsDown = false;
+var downKeyIsDown = false;
+var spaceKeyIsDown = false;
+
 window.onload = function() {
 		game = new Phaser.Game(620, 620, Phaser.CANVAS, "gameContainer",
 		{ create: create, update: update });
 }
 
 function create(){
-		game.stage.backgroundColor = "#00897B";
+		game.stage.backgroundColor = "#E53935";
 
     mazeGraphics = game.add.graphics(0, 0);
 		playerGraphics = game.add.graphics(0, 0);
 
-		playerPosX = 1;
-		playerPosY = 1;
-
-    createMaze(31,31);
-		drawGoal(29,29);
-		drawPlayer();
+		playerPosX = 15;
+		playerPosY = 15;
+    generateMaze(32,32);
 
 		/*var easystar = new EasyStar.js();
     easystar.setGrid(maze);
@@ -40,32 +43,83 @@ function create(){
 
 function update(){
 		if (game.input.keyboard.isDown(Phaser.Keyboard.LEFT)){
-				while (maze[playerPosY][playerPosX - 1] == 0){
-						playerPosX -= 1;
-						drawPlayer();
-				}
+        if (leftKeyIsDown == false){
+    				while (maze[playerPosY][playerPosX - 1] == 0){
+    						playerPosX -= 1;
+    						drawPlayer();
+                if (maze[playerPosY - 1][playerPosX] == 0 || maze[playerPosY + 1][playerPosX] == 0){
+                    break;
+                }
+    				}
+        }
+        leftKeyIsDown = true;
 		}
-		else if (game.input.keyboard.isDown(Phaser.Keyboard.RIGHT))
-		{
-				while (maze[playerPosY][playerPosX + 1] == 0){
-						playerPosX += 1;
-						drawPlayer();
-				}
+    else{
+        leftKeyIsDown = false;
+    }
+		if (game.input.keyboard.isDown(Phaser.Keyboard.RIGHT)){
+        if (rightKeyIsDown == false){
+    				while (maze[playerPosY][playerPosX + 1] == 0){
+    						playerPosX += 1;
+    						drawPlayer();
+                if (maze[playerPosY - 1][playerPosX] == 0 || maze[playerPosY + 1][playerPosX] == 0){
+                    break;
+                }
+    				}
+        }
+        rightKeyIsDown = true;
 		}
-		else if (game.input.keyboard.isDown(Phaser.Keyboard.UP))
-		{
-				while (maze[playerPosY - 1][playerPosX] == 0){
-						playerPosY -= 1;
-						drawPlayer();
-				}
+    else{
+        rightKeyIsDown = false;
+    }
+		if (game.input.keyboard.isDown(Phaser.Keyboard.UP)){
+        if (upKeyIsDown == false){
+    				while (maze[playerPosY - 1][playerPosX] == 0){
+    						playerPosY -= 1;
+    						drawPlayer();
+                if (maze[playerPosY][playerPosX - 1] == 0 || maze[playerPosY][playerPosX + 1] == 0){
+                    break;
+                }
+    				}
+        }
+        upKeyIsDown = true;
 		}
-		else if (game.input.keyboard.isDown(Phaser.Keyboard.DOWN))
-		{
-				while (maze[playerPosY + 1][playerPosX] == 0){
-						playerPosY += 1;
-						drawPlayer();
-				}
+    else{
+        upKeyIsDown = false;
+    }
+		if (game.input.keyboard.isDown(Phaser.Keyboard.DOWN)){
+        if (downKeyIsDown == false){
+      			while (maze[playerPosY + 1][playerPosX] == 0){
+      					playerPosY += 1;
+      					drawPlayer();
+                if (maze[playerPosY][playerPosX - 1] == 0 || maze[playerPosY][playerPosX + 1] == 0){
+                    break;
+                }
+      			}
+        }
+        downKeyIsDown = true;
 		}
+    else{
+        downKeyIsDown = false;
+    }
+    if (game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)){
+        if (spaceKeyIsDown == false){
+            if (playerPosX == 1 && playerPosY == 1 || playerPosX == 1 && playerPosY == 29
+                || playerPosX == 29 && playerPosY == 1 || playerPosX == 29 && playerPosY == 29){
+                  generateMaze(32,32);
+            }
+        }
+        spaceKeyIsDown = true;
+    }
+    else{
+      spaceKeyIsDown = false;
+    }
+}
+
+function generateMaze(mazeWidth, mazeHeight){
+    createMaze(mazeWidth,mazeHeight);
+    drawGoal();
+    drawPlayer();
 }
 
 function createMaze(mazeWidth, mazeHeight){
@@ -76,8 +130,8 @@ function createMaze(mazeWidth, mazeHeight){
 						maze[i][j] = 1;
 				}
 		}
-		var posX = 1;
-		var posY = 1;
+		var posX = 15;
+		var posY = 15;
 		maze[posX][posY] = 0;
 		moves.push(posY + posY * mazeWidth);
 		while(moves.length){
@@ -126,7 +180,7 @@ function createMaze(mazeWidth, mazeHeight){
 						posY = back % mazeWidth;
 				}
 		}
-		drawMaze(posX, posY, mazeWidth, mazeHeight);
+		drawMaze(mazeWidth, mazeHeight);
 }
 
 function drawPath(path){
@@ -144,32 +198,54 @@ function drawPath(path){
 function drawPlayer(){
 		playerGraphics.clear();
 		playerGraphics.beginFill(0xFFFFFF);
-		playerGraphics.drawRect(playerPosX * tileSize + 5, playerPosY * tileSize + 5, tileSize - 10, tileSize - 10);
+    playerGraphics.drawCircle(playerPosX * tileSize + 10, playerPosY * tileSize + 10, tileSize - 10);
 		playerGraphics.endFill();
 		drawPlayerPath();
 }
 
 function drawPlayerPath(){
 	mazeGraphics.beginFill(0xFFFFFF);
-	mazeGraphics.drawRect(playerPosX * tileSize + 8, playerPosY * tileSize + 8, tileSize - 16, tileSize - 16);
+	mazeGraphics.drawCircle(playerPosX * tileSize + 10, playerPosY * tileSize + 10, tileSize - 16);
 	mazeGraphics.endFill();
 }
 
-function drawGoal(posX, posY){
-		mazeGraphics.beginFill(0x004D40);
-		mazeGraphics.drawRect(posX * tileSize + 5, posY * tileSize + 5, tileSize - 10, tileSize - 10);
+function drawGoal(){
+		mazeGraphics.beginFill(0xFFFFFF);
+		mazeGraphics.drawCircle(1 * tileSize + 10, 1 * tileSize + 10, tileSize - 7);
+    mazeGraphics.drawCircle(1 * tileSize + 10, 29 * tileSize + 10, tileSize - 7);
+    mazeGraphics.drawCircle(29 * tileSize + 10, 1 * tileSize + 10, tileSize - 7);
+    mazeGraphics.drawCircle(29 * tileSize + 10, 29 * tileSize + 10, tileSize - 7);
+		mazeGraphics.endFill();
+    mazeGraphics.beginFill(0xE53935);
+		mazeGraphics.drawCircle(1 * tileSize + 10, 1 * tileSize + 10, tileSize - 11);
+    mazeGraphics.drawCircle(1 * tileSize + 10, 29 * tileSize + 10, tileSize - 11);
+    mazeGraphics.drawCircle(29 * tileSize + 10, 1 * tileSize + 10, tileSize - 11);
+    mazeGraphics.drawCircle(29 * tileSize + 10, 29 * tileSize + 10, tileSize - 11);
 		mazeGraphics.endFill();
 }
 
-function drawMaze(posX, posY, mazeWidth, mazeHeight){
+function drawMaze(mazeWidth, mazeHeight){
 		mazeGraphics.clear();
-		mazeGraphics.beginFill(0xFAFAFA);
+    drawBackground(mazeWidth, mazeHeight);
+		mazeGraphics.beginFill(0x151515);
 		for(i = 0; i < mazeHeight; i ++){
 		    for(j = 0; j < mazeWidth; j ++){
 		         if(maze[i][j] == 1){
-		              mazeGraphics.drawRect(j * tileSize, i * tileSize, tileSize, tileSize);
+		             mazeGraphics.drawRect(j * tileSize, i * tileSize, tileSize, tileSize);
 		         }
 		    }
 		}
 		mazeGraphics.endFill();
+}
+
+function drawBackground(mazeWidth, mazeHeight){
+    mazeGraphics.beginFill(0xB71C1C);
+    for(i = 0; i < mazeHeight; i ++){
+        for(j = 0; j < mazeWidth; j ++){
+             if(maze[i][j] == 1){
+                 mazeGraphics.drawRect(j * tileSize - 2, i * tileSize - 2, tileSize + 4, tileSize + 4);
+             }
+        }
+    }
+    mazeGraphics.endFill();
 }

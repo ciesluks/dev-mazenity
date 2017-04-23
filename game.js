@@ -25,7 +25,7 @@ window.onload = function() {
 }
 
 function create(){
-		game.stage.backgroundColor = "#E53935";
+		game.stage.backgroundColor = "#1E88E5";
 
     mazeGraphics = game.add.graphics(0, 0);
 		playerGraphics = game.add.graphics(0, 0);
@@ -33,12 +33,6 @@ function create(){
 		playerPosX = 15;
 		playerPosY = 15;
     generateMaze(32,32);
-
-		/*var easystar = new EasyStar.js();
-    easystar.setGrid(maze);
-    easystar.setAcceptableTiles([0]);
-    easystar.findPath(1, 1, 29, 29, drawPath);
-    easystar.calculate();*/
 }
 
 function update(){
@@ -183,18 +177,6 @@ function createMaze(mazeWidth, mazeHeight){
 		drawMaze(mazeWidth, mazeHeight);
 }
 
-function drawPath(path){
-		var i = 0;
-		game.time.events.loop(Phaser.Timer.SECOND/25, function(){
-		    if(i < path.length){
-						mazeGraphics.beginFill(0xFFFFFF);
-						mazeGraphics.drawRect(path[i].x * tileSize + 8, path[i].y * tileSize + 8, tileSize - 16, tileSize - 16);
-						i++;
-						mazeGraphics.endFill();
-		    }
-		})
-}
-
 function drawPlayer(){
 		playerGraphics.clear();
 		playerGraphics.beginFill(0xFFFFFF);
@@ -216,7 +198,7 @@ function drawGoal(){
     mazeGraphics.drawCircle(29 * tileSize + 10, 1 * tileSize + 10, tileSize - 7);
     mazeGraphics.drawCircle(29 * tileSize + 10, 29 * tileSize + 10, tileSize - 7);
 		mazeGraphics.endFill();
-    mazeGraphics.beginFill(0xE53935);
+    mazeGraphics.beginFill(0x1E88E5);
 		mazeGraphics.drawCircle(1 * tileSize + 10, 1 * tileSize + 10, tileSize - 11);
     mazeGraphics.drawCircle(1 * tileSize + 10, 29 * tileSize + 10, tileSize - 11);
     mazeGraphics.drawCircle(29 * tileSize + 10, 1 * tileSize + 10, tileSize - 11);
@@ -226,8 +208,8 @@ function drawGoal(){
 
 function drawMaze(mazeWidth, mazeHeight){
 		mazeGraphics.clear();
-    drawBackground(mazeWidth, mazeHeight);
-		mazeGraphics.beginFill(0x151515);
+    //drawBackground(mazeWidth, mazeHeight);
+		mazeGraphics.beginFill(0x212121);
 		for(i = 0; i < mazeHeight; i ++){
 		    for(j = 0; j < mazeWidth; j ++){
 		         if(maze[i][j] == 1){
@@ -239,7 +221,7 @@ function drawMaze(mazeWidth, mazeHeight){
 }
 
 function drawBackground(mazeWidth, mazeHeight){
-    mazeGraphics.beginFill(0xB71C1C);
+    mazeGraphics.beginFill(0x0D47A1);
     for(i = 0; i < mazeHeight; i ++){
         for(j = 0; j < mazeWidth; j ++){
              if(maze[i][j] == 1){

@@ -26,20 +26,20 @@ function create(){
 		players[0] = new player(
         15,
         15,
-        Phaser.Keyboard.LEFT,
-        Phaser.Keyboard.RIGHT,
-        Phaser.Keyboard.UP,
-        Phaser.Keyboard.DOWN,
-        new maze(0,0,mazes[0],29,29)
-    );
-    players[1] = new player(
-        1,
-        1,
         Phaser.Keyboard.A,
         Phaser.Keyboard.D,
         Phaser.Keyboard.W,
         Phaser.Keyboard.S,
-        new maze(620,0,mazes[0],29,29)
+        0
+    );
+    players[1] = new player(
+        15,
+        15,
+        Phaser.Keyboard.LEFT,
+        Phaser.Keyboard.RIGHT,
+        Phaser.Keyboard.UP,
+        Phaser.Keyboard.DOWN,
+        620
     );
     newGame();
 }
@@ -51,7 +51,7 @@ function update(){
     }
 }
 
-function player(x, y, left, right, up, down, maze) {
+function player(x, y, left, right, up, down, mazeStartPosX) {
     this.posX = x;
     this.posY = y;
     this.leftKey = left;
@@ -63,7 +63,8 @@ function player(x, y, left, right, up, down, maze) {
     this.upKeyIsDown = false;
     this.downKeyIsDown = false;
     this.graphics = game.add.graphics(0, 0);
-    this.currentMaze = maze;
+    this.currentMazeNumber = 0;
+    this.currentMaze = new maze(mazeStartPosX,0,mazes[this.currentMazeNumber],29,29);
 }
 
 function maze(x, y, grid, goalPosX, goalPosY) {
@@ -140,17 +141,22 @@ function movePlayer(player){
 }
 
 function checkForGoal(player) {
-    if (player.posX == 29 && player.posY == 29){
+    if (player.posX == player.currentMaze.goalPosX && player.posY == player.currentMaze.goalPosY){
+          createMaze();
           player.posX = 1;
           player.posY = 1;
-          generateMaze(29,29);
+          player.currentMazeNumber = player.currentMazeNumber + 1;
+          player.currentMaze.grid = mazes[player.currentMazeNumber];
+          drawMaze(player);
+          drawGoal(player);
+          drawPlayer(player);
     }
 }
 
 function newGame(){
-    //drawGoal(goalPosX, goalPosY);
     for(var i = 0; i < players.length; i ++){
         drawMaze(players[i]);
+        drawGoal(players[i]);
         drawPlayer(players[i]);
     }
 }
@@ -231,13 +237,13 @@ function drawPlayerPath(player){
   	player.currentMaze.graphics.endFill();
 }
 
-function drawGoal(goalPosX, goalPosY){
-		mazeGraphics.beginFill(0xFFFFFF);
-		mazeGraphics.drawCircle(goalPosX * tileSize + 10, goalPosY * tileSize + 10, tileSize - 7);
-		mazeGraphics.endFill();
-    mazeGraphics.beginFill(0x1E88E5);
-		mazeGraphics.drawCircle(goalPosX * tileSize + 10, goalPosY * tileSize + 10, tileSize - 11);
-		mazeGraphics.endFill();
+function drawGoal(player){
+		player.currentMaze.graphics.beginFill(0xFFFFFF);
+		player.currentMaze.graphics.drawCircle(player.currentMaze.posX + (player.currentMaze.goalPosX * tileSize + 10), player.currentMaze.posY + (player.currentMaze.goalPosY * tileSize + 10), tileSize - 7);
+		player.currentMaze.graphics.endFill();
+    player.currentMaze.graphics.beginFill(0x1E88E5);
+		player.currentMaze.graphics.drawCircle(player.currentMaze.posX + (player.currentMaze.goalPosX * tileSize + 10), player.currentMaze.posY + (player.currentMaze.goalPosY * tileSize + 10), tileSize - 11);
+		player.currentMaze.graphics.endFill();
 }
 
 function drawMaze(player){

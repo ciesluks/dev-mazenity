@@ -7,116 +7,162 @@ window.addEventListener("keydown", function(e) {
 }, false);
 
 var game;
-var maze = [];
+var mazes = [];
 var tileSize = 20;
-var mazeGraphics;
-var playerPosX;
-var playerPosY;
-
-var leftKeyIsDown = false;
-var rightKeyIsDown = false;
-var upKeyIsDown = false;
-var downKeyIsDown = false;
-var spaceKeyIsDown = false;
+var mazeWidth = 32;
+var mazeHeight = 32;
+var players = [];
 
 window.onload = function() {
-		game = new Phaser.Game(620, 620, Phaser.CANVAS, "gameContainer",
+		game = new Phaser.Game(1240, 620, Phaser.CANVAS, "gameContainer",
 		{ create: create, update: update });
 }
 
 function create(){
 		game.stage.backgroundColor = "#1E88E5";
 
-    mazeGraphics = game.add.graphics(0, 0);
-		playerGraphics = game.add.graphics(0, 0);
+    createMaze();
 
-		playerPosX = 15;
-		playerPosY = 15;
-    generateMaze(32,32);
+		players[0] = new player(
+        15,
+        15,
+        Phaser.Keyboard.A,
+        Phaser.Keyboard.D,
+        Phaser.Keyboard.W,
+        Phaser.Keyboard.S,
+        0
+    );
+    players[1] = new player(
+        15,
+        15,
+        Phaser.Keyboard.LEFT,
+        Phaser.Keyboard.RIGHT,
+        Phaser.Keyboard.UP,
+        Phaser.Keyboard.DOWN,
+        620
+    );
+    newGame();
 }
 
 function update(){
-		if (game.input.keyboard.isDown(Phaser.Keyboard.LEFT)){
-        if (leftKeyIsDown == false){
-    				while (maze[playerPosY][playerPosX - 1] == 0){
-    						playerPosX -= 1;
-    						drawPlayer();
-                if (maze[playerPosY - 1][playerPosX] == 0 || maze[playerPosY + 1][playerPosX] == 0){
+    for(i = 0; i < players.length; i ++){
+		    movePlayer(players[i]);
+        checkForGoal(players[i]);
+    }
+}
+
+function player(x, y, left, right, up, down, mazeStartPosX) {
+    this.posX = x;
+    this.posY = y;
+    this.leftKey = left;
+    this.rightKey = right;
+    this.upKey = up;
+    this.downKey = down;
+    this.leftKeyIsDown = false;
+    this.rightKeyIsDown = false;
+    this.upKeyIsDown = false;
+    this.downKeyIsDown = false;
+    this.graphics = game.add.graphics(0, 0);
+    this.currentMazeNumber = 0;
+    this.currentMaze = new maze(mazeStartPosX,0,mazes[this.currentMazeNumber],29,29);
+}
+
+function maze(x, y, grid, goalPosX, goalPosY) {
+    this.posX = x;
+    this.posY = y;
+    this.grid = grid;
+    this.goalPosX = goalPosX;
+    this.goalPosY = goalPosY;
+    this.graphics = game.add.graphics(0, 0);
+}
+
+function movePlayer(player){
+    var maze = player.currentMaze.grid;
+    if (game.input.keyboard.isDown(player.leftKey)){
+        if (player.leftKeyIsDown == false){
+            while (maze[player.posY][player.posX - 1] == 0){
+                player.posX -= 1;
+                drawPlayer(player);
+                if (maze[player.posY - 1][player.posX] == 0 || maze[player.posY + 1][player.posX] == 0){
                     break;
                 }
-    				}
-        }
-        leftKeyIsDown = true;
-		}
-    else{
-        leftKeyIsDown = false;
-    }
-		if (game.input.keyboard.isDown(Phaser.Keyboard.RIGHT)){
-        if (rightKeyIsDown == false){
-    				while (maze[playerPosY][playerPosX + 1] == 0){
-    						playerPosX += 1;
-    						drawPlayer();
-                if (maze[playerPosY - 1][playerPosX] == 0 || maze[playerPosY + 1][playerPosX] == 0){
-                    break;
-                }
-    				}
-        }
-        rightKeyIsDown = true;
-		}
-    else{
-        rightKeyIsDown = false;
-    }
-		if (game.input.keyboard.isDown(Phaser.Keyboard.UP)){
-        if (upKeyIsDown == false){
-    				while (maze[playerPosY - 1][playerPosX] == 0){
-    						playerPosY -= 1;
-    						drawPlayer();
-                if (maze[playerPosY][playerPosX - 1] == 0 || maze[playerPosY][playerPosX + 1] == 0){
-                    break;
-                }
-    				}
-        }
-        upKeyIsDown = true;
-		}
-    else{
-        upKeyIsDown = false;
-    }
-		if (game.input.keyboard.isDown(Phaser.Keyboard.DOWN)){
-        if (downKeyIsDown == false){
-      			while (maze[playerPosY + 1][playerPosX] == 0){
-      					playerPosY += 1;
-      					drawPlayer();
-                if (maze[playerPosY][playerPosX - 1] == 0 || maze[playerPosY][playerPosX + 1] == 0){
-                    break;
-                }
-      			}
-        }
-        downKeyIsDown = true;
-		}
-    else{
-        downKeyIsDown = false;
-    }
-    if (game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)){
-        if (spaceKeyIsDown == false){
-            if (playerPosX == 1 && playerPosY == 1 || playerPosX == 1 && playerPosY == 29
-                || playerPosX == 29 && playerPosY == 1 || playerPosX == 29 && playerPosY == 29){
-                  generateMaze(32,32);
             }
         }
-        spaceKeyIsDown = true;
+        player.leftKeyIsDown = true;
     }
     else{
-      spaceKeyIsDown = false;
+        player.leftKeyIsDown = false;
+    }
+    if (game.input.keyboard.isDown(player.rightKey)){
+        if (player.rightKeyIsDown == false){
+            while (maze[player.posY][player.posX + 1] == 0){
+                player.posX += 1;
+                drawPlayer(player);
+                if (maze[player.posY - 1][player.posX] == 0 || maze[player.posY + 1][player.posX] == 0){
+                    break;
+                }
+            }
+        }
+        player.rightKeyIsDown = true;
+    }
+    else{
+        player.rightKeyIsDown = false;
+    }
+    if (game.input.keyboard.isDown(player.upKey)){
+        if (player.upKeyIsDown == false){
+            while (maze[player.posY - 1][player.posX] == 0){
+                player.posY -= 1;
+                drawPlayer(player);
+                if (maze[player.posY][player.posX - 1] == 0 || maze[player.posY][player.posX + 1] == 0){
+                    break;
+                }
+            }
+        }
+        player.upKeyIsDown = true;
+    }
+    else{
+        player.upKeyIsDown = false;
+    }
+    if (game.input.keyboard.isDown(player.downKey)){
+        if (player.downKeyIsDown == false){
+            while (maze[player.posY + 1][player.posX] == 0){
+                player.posY += 1;
+                drawPlayer(player);
+                if (maze[player.posY][player.posX - 1] == 0 || maze[player.posY][player.posX + 1] == 0){
+                    break;
+                }
+            }
+        }
+        player.downKeyIsDown = true;
+    }
+    else{
+        player.downKeyIsDown = false;
     }
 }
 
-function generateMaze(mazeWidth, mazeHeight){
-    createMaze(mazeWidth,mazeHeight);
-    drawGoal();
-    drawPlayer();
+function checkForGoal(player) {
+    if (player.posX == player.currentMaze.goalPosX && player.posY == player.currentMaze.goalPosY){
+          createMaze();
+          player.posX = 1;
+          player.posY = 1;
+          player.currentMazeNumber = player.currentMazeNumber + 1;
+          player.currentMaze.grid = mazes[player.currentMazeNumber];
+          drawMaze(player);
+          drawGoal(player);
+          drawPlayer(player);
+    }
 }
 
-function createMaze(mazeWidth, mazeHeight){
+function newGame(){
+    for(var i = 0; i < players.length; i ++){
+        drawMaze(players[i]);
+        drawGoal(players[i]);
+        drawPlayer(players[i]);
+    }
+}
+
+function createMaze(){
+    var maze = [];
 		var moves = [];
 		for(var i = 0; i < mazeHeight; i ++){
 				maze[i] = [];
@@ -174,60 +220,41 @@ function createMaze(mazeWidth, mazeHeight){
 						posY = back % mazeWidth;
 				}
 		}
-		drawMaze(mazeWidth, mazeHeight);
+    mazes.push(maze);
 }
 
-function drawPlayer(){
-		playerGraphics.clear();
-		playerGraphics.beginFill(0xFFFFFF);
-    playerGraphics.drawCircle(playerPosX * tileSize + 10, playerPosY * tileSize + 10, tileSize - 10);
-		playerGraphics.endFill();
-		drawPlayerPath();
+function drawPlayer(player){
+		player.graphics.clear();
+		player.graphics.beginFill(0xFFFFFF);
+    player.graphics.drawCircle(player.currentMaze.posX + (player.posX * tileSize + 10), player.currentMaze.posY + (player.posY * tileSize + 10), tileSize - 10);
+		player.graphics.endFill();
+		drawPlayerPath(player);
 }
 
-function drawPlayerPath(){
-	mazeGraphics.beginFill(0xFFFFFF);
-	mazeGraphics.drawCircle(playerPosX * tileSize + 10, playerPosY * tileSize + 10, tileSize - 16);
-	mazeGraphics.endFill();
+function drawPlayerPath(player){
+  	player.currentMaze.graphics.beginFill(0xFFFFFF);
+  	player.currentMaze.graphics.drawCircle(player.currentMaze.posX + (player.posX * tileSize + 10), player.currentMaze.posY + (player.posY * tileSize + 10), tileSize - 16);
+  	player.currentMaze.graphics.endFill();
 }
 
-function drawGoal(){
-		mazeGraphics.beginFill(0xFFFFFF);
-		mazeGraphics.drawCircle(1 * tileSize + 10, 1 * tileSize + 10, tileSize - 7);
-    mazeGraphics.drawCircle(1 * tileSize + 10, 29 * tileSize + 10, tileSize - 7);
-    mazeGraphics.drawCircle(29 * tileSize + 10, 1 * tileSize + 10, tileSize - 7);
-    mazeGraphics.drawCircle(29 * tileSize + 10, 29 * tileSize + 10, tileSize - 7);
-		mazeGraphics.endFill();
-    mazeGraphics.beginFill(0x1E88E5);
-		mazeGraphics.drawCircle(1 * tileSize + 10, 1 * tileSize + 10, tileSize - 11);
-    mazeGraphics.drawCircle(1 * tileSize + 10, 29 * tileSize + 10, tileSize - 11);
-    mazeGraphics.drawCircle(29 * tileSize + 10, 1 * tileSize + 10, tileSize - 11);
-    mazeGraphics.drawCircle(29 * tileSize + 10, 29 * tileSize + 10, tileSize - 11);
-		mazeGraphics.endFill();
+function drawGoal(player){
+		player.currentMaze.graphics.beginFill(0xFFFFFF);
+		player.currentMaze.graphics.drawCircle(player.currentMaze.posX + (player.currentMaze.goalPosX * tileSize + 10), player.currentMaze.posY + (player.currentMaze.goalPosY * tileSize + 10), tileSize - 7);
+		player.currentMaze.graphics.endFill();
+    player.currentMaze.graphics.beginFill(0x1E88E5);
+		player.currentMaze.graphics.drawCircle(player.currentMaze.posX + (player.currentMaze.goalPosX * tileSize + 10), player.currentMaze.posY + (player.currentMaze.goalPosY * tileSize + 10), tileSize - 11);
+		player.currentMaze.graphics.endFill();
 }
 
-function drawMaze(mazeWidth, mazeHeight){
-		mazeGraphics.clear();
-    //drawBackground(mazeWidth, mazeHeight);
-		mazeGraphics.beginFill(0x212121);
+function drawMaze(player){
+		player.currentMaze.graphics.clear();
+		player.currentMaze.graphics.beginFill(0x212121);
 		for(i = 0; i < mazeHeight; i ++){
 		    for(j = 0; j < mazeWidth; j ++){
-		         if(maze[i][j] == 1){
-		             mazeGraphics.drawRect(j * tileSize, i * tileSize, tileSize, tileSize);
+		         if(player.currentMaze.grid[i][j] == 1){
+		             player.currentMaze.graphics.drawRect(player.currentMaze.posX + (j * tileSize), player.currentMaze.posY + (i * tileSize), tileSize, tileSize);
 		         }
 		    }
 		}
-		mazeGraphics.endFill();
-}
-
-function drawBackground(mazeWidth, mazeHeight){
-    mazeGraphics.beginFill(0x0D47A1);
-    for(i = 0; i < mazeHeight; i ++){
-        for(j = 0; j < mazeWidth; j ++){
-             if(maze[i][j] == 1){
-                 mazeGraphics.drawRect(j * tileSize - 2, i * tileSize - 2, tileSize + 4, tileSize + 4);
-             }
-        }
-    }
-    mazeGraphics.endFill();
+		player.currentMaze.graphics.endFill();
 }

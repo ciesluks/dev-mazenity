@@ -23,7 +23,7 @@ function create(){
 
     createMaze();
 
-		players[0] = new player(
+    players[0] = new player(
         15,
         15,
         Phaser.Keyboard.A,
@@ -42,6 +42,7 @@ function create(){
         620
     );
     newGame();
+    //game.time.events.add(Phaser.Timer.SECOND * 20, restartGame, this);
 }
 
 function update(){
@@ -65,6 +66,7 @@ function player(x, y, left, right, up, down, mazeStartPosX) {
     this.graphics = game.add.graphics(0, 0);
     this.currentMazeNumber = 0;
     this.currentMaze = new maze(mazeStartPosX,0,mazes[this.currentMazeNumber],29,29);
+    this.score = 0;
 }
 
 function maze(x, y, grid, goalPosX, goalPosY) {
@@ -143,10 +145,12 @@ function movePlayer(player){
 function checkForGoal(player) {
     if (player.posX == player.currentMaze.goalPosX && player.posY == player.currentMaze.goalPosY){
           createMaze();
+          player.score = player.score + 1;
           player.posX = 1;
           player.posY = 1;
           player.currentMazeNumber = player.currentMazeNumber + 1;
           player.currentMaze.grid = mazes[player.currentMazeNumber];
+
           drawMaze(player);
           drawGoal(player);
           drawPlayer(player);
@@ -159,6 +163,10 @@ function newGame(){
         drawGoal(players[i]);
         drawPlayer(players[i]);
     }
+}
+
+function restartGame(){
+    game.state.restart();
 }
 
 function createMaze(){

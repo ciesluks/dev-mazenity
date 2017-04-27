@@ -8,24 +8,27 @@ window.addEventListener("keydown", function(e) {
 
 var game;
 var mazes = [];
-var tileSize = 20;
-var mazeWidth = 32;
-var mazeHeight = 32;
+var tileSize = 24;
+var mazeWidth = 25;
+var mazeHeight = 25;
 var players = [];
 
 window.onload = function() {
-		game = new Phaser.Game(1240, 620, Phaser.CANVAS, "gameContainer",
-		{ create: create, update: update });
+		game = new Phaser.Game(1224, 600, Phaser.CANVAS, "gameContainer",
+		{ preload: preload, create: create, update: update });
+}
+
+function preload(){
+    game.load.image('maze_wall', 'assets/images/maze_wall.png');
+    game.load.image('maze_floor', 'assets/images/maze_floor.png');
 }
 
 function create(){
-		game.stage.backgroundColor = "#1E88E5";
+		game.stage.backgroundColor = "#404040";
 
     createMaze();
 
     players[0] = new player(
-        15,
-        15,
         Phaser.Keyboard.A,
         Phaser.Keyboard.D,
         Phaser.Keyboard.W,
@@ -33,13 +36,11 @@ function create(){
         0
     );
     players[1] = new player(
-        15,
-        15,
         Phaser.Keyboard.LEFT,
         Phaser.Keyboard.RIGHT,
         Phaser.Keyboard.UP,
         Phaser.Keyboard.DOWN,
-        620
+        624
     );
     newGame();
     //game.time.events.add(Phaser.Timer.SECOND * 20, restartGame, this);
@@ -52,9 +53,9 @@ function update(){
     }
 }
 
-function player(x, y, left, right, up, down, mazeStartPosX) {
-    this.posX = x;
-    this.posY = y;
+function player(left, right, up, down, mazeStartPosX) {
+    this.posX = 1;
+    this.posY = 1;
     this.leftKey = left;
     this.rightKey = right;
     this.upKey = up;
@@ -65,7 +66,7 @@ function player(x, y, left, right, up, down, mazeStartPosX) {
     this.downKeyIsDown = false;
     this.graphics = game.add.graphics(0, 0);
     this.currentMazeNumber = 0;
-    this.currentMaze = new maze(mazeStartPosX,0,mazes[this.currentMazeNumber],29,29);
+    this.currentMaze = new maze(mazeStartPosX,0,mazes[this.currentMazeNumber],23,23);
     this.score = 0;
 }
 
@@ -178,8 +179,8 @@ function createMaze(){
 						maze[i][j] = 1;
 				}
 		}
-		var posX = 15;
-		var posY = 15;
+		var posX = 1;
+		var posY = 1;
 		maze[posX][posY] = 0;
 		moves.push(posY + posY * mazeWidth);
 		while(moves.length){
@@ -259,8 +260,10 @@ function drawMaze(player){
 		player.currentMaze.graphics.beginFill(0x212121);
 		for(i = 0; i < mazeHeight; i ++){
 		    for(j = 0; j < mazeWidth; j ++){
+             game.add.sprite(player.currentMaze.posX + (j * tileSize), player.currentMaze.posY + (i * tileSize), 'maze_floor')
 		         if(player.currentMaze.grid[i][j] == 1){
 		             player.currentMaze.graphics.drawRect(player.currentMaze.posX + (j * tileSize), player.currentMaze.posY + (i * tileSize), tileSize, tileSize);
+                 game.add.sprite(player.currentMaze.posX + (j * tileSize), player.currentMaze.posY + (i * tileSize), 'maze_wall')
 		         }
 		    }
 		}

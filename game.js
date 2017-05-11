@@ -1,4 +1,3 @@
-// Source code: http://www.emanueleferonato.com/2015/07/03/pure-javascript-a-maze-solving-with-a-bit-of-magic-thanks-to-phaser/
 window.addEventListener("keydown", function(e) {
     // space and arrow keys
     if([32, 37, 38, 39, 40].indexOf(e.keyCode) > -1) {
@@ -19,8 +18,23 @@ window.onload = function() {
 }
 
 function preload(){
-    game.load.image('maze_wall', 'assets/images/maze_wall.png');
-    game.load.image('maze_floor', 'assets/images/maze_floor.png');
+    game.load.image('maze_wall', 'assets/images/road_grass.png');
+    game.load.image('maze_cross', 'assets/images/road_cross.png');
+    game.load.image('maze_horizontal_left', 'assets/images/road_horizontal_left.png');
+    game.load.image('maze_horizontal_right', 'assets/images/road_horizontal_right.png');
+    game.load.image('maze_horizontal', 'assets/images/road_horizontal.png');
+    game.load.image('maze_threeway_down', 'assets/images/road_threeway_down.png');
+    game.load.image('maze_threeway_up', 'assets/images/road_threeway_up.png');
+    game.load.image('maze_threeway_left', 'assets/images/road_threeway_left.png');
+    game.load.image('maze_threeway_right', 'assets/images/road_threeway_right.png');
+    game.load.image('maze_vertical', 'assets/images/road_vertical.png');
+    game.load.image('maze_vertical_up', 'assets/images/road_vertical_up.png');
+    game.load.image('maze_vertical_down', 'assets/images/road_vertical_down.png');
+    game.load.image('maze_twoway_left_down', 'assets/images/road_twoway_left_down.png');
+    game.load.image('maze_twoway_left_up', 'assets/images/road_twoway_left_up.png');
+    game.load.image('maze_twoway_right_down', 'assets/images/road_twoway_right_down.png');
+    game.load.image('maze_twoway_right_up', 'assets/images/road_twoway_right_up.png');
+    game.load.image('ufo_green', 'assets/images/ufo_green.png');
 }
 
 function create(){
@@ -64,10 +78,10 @@ function player(left, right, up, down, mazeStartPosX) {
     this.rightKeyIsDown = false;
     this.upKeyIsDown = false;
     this.downKeyIsDown = false;
-    this.graphics = game.add.graphics(0, 0);
     this.currentMazeNumber = 0;
     this.currentMaze = new maze(mazeStartPosX,0,mazes[this.currentMazeNumber],23,23);
     this.score = 0;
+    this.sprite = game.add.sprite(this.currentMaze.posX + (this.posX * tileSize), this.currentMaze.posY + (this.posY * tileSize), 'ufo_green')
 }
 
 function maze(x, y, grid, goalPosX, goalPosY) {
@@ -77,6 +91,7 @@ function maze(x, y, grid, goalPosX, goalPosY) {
     this.goalPosX = goalPosX;
     this.goalPosY = goalPosY;
     this.graphics = game.add.graphics(0, 0);
+    this.walls = game.add.group();
 }
 
 function movePlayer(player){
@@ -233,10 +248,8 @@ function createMaze(){
 }
 
 function drawPlayer(player){
-		player.graphics.clear();
-		player.graphics.beginFill(0xFFFFFF);
-    player.graphics.drawCircle(player.currentMaze.posX + (player.posX * tileSize + 10), player.currentMaze.posY + (player.posY * tileSize + 10), tileSize - 10);
-		player.graphics.endFill();
+    player.sprite.x = player.currentMaze.posX + (player.posX * tileSize);
+    player.sprite.y = player.currentMaze.posY + (player.posY * tileSize)
 		drawPlayerPath(player);
 }
 
@@ -256,16 +269,61 @@ function drawGoal(player){
 }
 
 function drawMaze(player){
-		player.currentMaze.graphics.clear();
-		player.currentMaze.graphics.beginFill(0x212121);
+    player.currentMaze.graphics.clear();
+    player.currentMaze.walls.removeAll();
+    var grid = player.currentMaze.grid;
 		for(i = 0; i < mazeHeight; i ++){
 		    for(j = 0; j < mazeWidth; j ++){
-             game.add.sprite(player.currentMaze.posX + (j * tileSize), player.currentMaze.posY + (i * tileSize), 'maze_floor')
-		         if(player.currentMaze.grid[i][j] == 1){
-		             player.currentMaze.graphics.drawRect(player.currentMaze.posX + (j * tileSize), player.currentMaze.posY + (i * tileSize), tileSize, tileSize);
-                 game.add.sprite(player.currentMaze.posX + (j * tileSize), player.currentMaze.posY + (i * tileSize), 'maze_wall')
+		         if(grid[i][j] == 1){
+                 player.currentMaze.walls.create(player.currentMaze.posX + (j * tileSize), player.currentMaze.posY + (i * tileSize), 'maze_wall');
+		         }
+             else if(grid[i][j] == 0){
+                 if(grid[i][j-1] == 0 && grid[i][j+1] == 0 && grid[i+1][j] == 0 && grid[i-1][j] == 0){
+                    player.currentMaze.walls.create(player.currentMaze.posX + (j * tileSize), player.currentMaze.posY + (i * tileSize), 'maze_cross');
+                 }
+                 else if(grid[i][j+1] == 0 && grid[i+1][j] == 0 && grid[i-1][j] == 0){
+                    player.currentMaze.walls.create(player.currentMaze.posX + (j * tileSize), player.currentMaze.posY + (i * tileSize), 'maze_threeway_right');
+                 }
+                 else if(grid[i][j-1] == 0 && grid[i+1][j] == 0 && grid[i-1][j] == 0){
+                    player.currentMaze.walls.create(player.currentMaze.posX + (j * tileSize), player.currentMaze.posY + (i * tileSize), 'maze_threeway_left');
+                 }
+                 else if(grid[i][j-1] == 0 && grid[i][j+1] == 0 && grid[i-1][j] == 0){
+                    player.currentMaze.walls.create(player.currentMaze.posX + (j * tileSize), player.currentMaze.posY + (i * tileSize), 'maze_threeway_up');
+                 }
+                 else if(grid[i][j-1] == 0 && grid[i][j+1] == 0 && grid[i+1][j] == 0){
+                    player.currentMaze.walls.create(player.currentMaze.posX + (j * tileSize), player.currentMaze.posY + (i * tileSize), 'maze_threeway_down');
+                 }
+                 else if(grid[i-1][j] == 0 && grid[i][j-1] == 0){
+                    player.currentMaze.walls.create(player.currentMaze.posX + (j * tileSize), player.currentMaze.posY + (i * tileSize), 'maze_twoway_left_up');
+                 }
+                 else if(grid[i+1][j] == 0 && grid[i][j-1] == 0){
+                    player.currentMaze.walls.create(player.currentMaze.posX + (j * tileSize), player.currentMaze.posY + (i * tileSize), 'maze_twoway_left_down');
+                 }
+                 else if(grid[i-1][j] == 0 && grid[i][j+1] == 0){
+                    player.currentMaze.walls.create(player.currentMaze.posX + (j * tileSize), player.currentMaze.posY + (i * tileSize), 'maze_twoway_right_up');
+                 }
+                 else if(grid[i+1][j] == 0 && grid[i][j+1] == 0){
+                    player.currentMaze.walls.create(player.currentMaze.posX + (j * tileSize), player.currentMaze.posY + (i * tileSize), 'maze_twoway_right_down');
+                 }
+                 else if(grid[i][j-1] == 0 && grid[i][j+1] == 0){
+                    player.currentMaze.walls.create(player.currentMaze.posX + (j * tileSize), player.currentMaze.posY + (i * tileSize), 'maze_horizontal');
+                 }
+                 else if(grid[i-1][j] == 0 && grid[i+1][j] == 0){
+                    player.currentMaze.walls.create(player.currentMaze.posX + (j * tileSize), player.currentMaze.posY + (i * tileSize), 'maze_vertical');
+                 }
+                 else if(grid[i-1][j] == 0){
+                    player.currentMaze.walls.create(player.currentMaze.posX + (j * tileSize), player.currentMaze.posY + (i * tileSize), 'maze_vertical_down');
+                 }
+                 else if(grid[i+1][j] == 0){
+                    player.currentMaze.walls.create(player.currentMaze.posX + (j * tileSize), player.currentMaze.posY + (i * tileSize), 'maze_vertical_up');
+                 }
+                 else if(grid[i][j+1] == 0){
+                    player.currentMaze.walls.create(player.currentMaze.posX + (j * tileSize), player.currentMaze.posY + (i * tileSize), 'maze_horizontal_left');
+                 }
+                 else if(grid[i][j-1] == 0){
+                    player.currentMaze.walls.create(player.currentMaze.posX + (j * tileSize), player.currentMaze.posY + (i * tileSize), 'maze_horizontal_right');
+                 }
 		         }
 		    }
 		}
-		player.currentMaze.graphics.endFill();
 }
